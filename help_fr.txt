@@ -1,0 +1,100 @@
+Crédit -> http://wiki.hoa.ro/doku.php?id=web:ferme-autoblog
+
+====== Mettre en place une ferme d'autoblog ======
+
+===== Objectif =====
+L'objectif de ce tutoriel est de mettre en place un ensemble d'autoblog, sans dupliquer le code pour chacun d'entre eux.
+
+L'idée est également de pouvoir ajouter simplement de nouveaux blogs en réplication.
+
+===== Prérequis =====
+Ce tutoriel s'appuie sur la version de VroumVroumBlog développée par Bohwaz. 
+
+Le système doit donc disposer des prérequis suivants :
+  * SQLite3
+  * PHP 5.3
+
+===== Mise en place des fichiers =====
+
+==== Fichier d'origine ====
+
+Je considère dès cette partie que votre espace web est déjà accessible. 
+
+Dans cet exemple, cet espace est dans le répertoire /var/www/streisand/.
+
+Dans ce répertoire, créer les fichiers suivants :
+    * [[web:autoblog-autoblogphp|autoblog.php]] : fichier core
+    * [[web:autoblog-configphp|config.php]] : permet de passer l'interface en //français//
+
+==== Page principale (liste des blogs) ====
+
+Le fichier [[web:autoblog-indexphp-ferme-ajout|index.php]] est à placer dans le même répertoire.
+
+Il permet de lister l'ensemble des blogs répliqués, c'est à dire tous les répertoires présents dans le dossier /var/www/streisand/
+
+Il intègre également un formulaire qui permet d'ajouter des autoblogs à la volée, développé pour [[http://streisand.hoa.ro]] ([[web:autoblog-formulaire-ajout|en savoir plus]]). 
+
+Vous pouvez également choisir d'adapter le code pour placer le formulaire d'ajout dans un autre fichier, et ne le rendre accessible qu'aux administrateurs.
+
+===== Réécriture d'URL =====
+
+Dans le fichier de configuration d'Apache, ou dans un fichier .htaccess placé dans le dossier /var/www/streisand/, ajouter :
+// (correction 24/08/12) //
+<code>
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^([a-zA-Z0-9\-\.\ ]*)/(.*) /$1/index.php?$2 [QSA,L]
+</code>
+
+===== Référencement =====
+
+La duplication de contenu est mal vue par les moteurs de recherche, et principalement par Google.
+Même si les pages contiennent la fameuse directive "//link rel="canonical"//", elle n'est prévue pour s'appliquer que sur un même domaine. Dans le cas présent, elle n'est donc pas utile.
+
+Etant donné que l'objectif de ce projet est simplement de mettre à disposition un backup des articles, j'ai fait le choix pour [[http://streisand.hoa.ro]] de **ne pas référencer les autoblogs**.
+
+Ainsi, mon nom de domaine n'est pas pénalisé par Google pour duplication de contenu, et les backups sont bien présents en cas de besoin.
+
+Pour faire cela, vous devez mettre à la racine de votre répertoire web le fichier **robots.txt** (le nom est important), contenant les lignes :
+<code>
+User-Agent: *
+Disallow: /
+</code>
+
+===== Conclusion =====
+
+Il ne vous reste plus qu'à ajouter les blogs que vous voulez répliquer avec leur flux RSS au travers du formulaire du fichier index.php.
+
+Puis à les afficher pour créer les bases de données SQLite correspondante et mettre à jour les données.
+
+
+===== Récapulatif des fichiers =====
+==== Arborescence ====
+
+<code>
+/var/www/streisand/
+|
+|--- index.php
+|--- autoblog.php
+|--- config.php
+|--- blog1/
+   |
+   |--- index.php (créé automatiquement)
+   |--- vvb.ini (créé automatiquement)
+|--- blog2/
+   |
+   |--- index.php
+   |--- vvb.ini
+[...]
+|--- blogN/
+   |
+   |--- index.php
+   |--- vvb.ini
+</code>
+
+==== Fichiers ====
+ 
+     * [[web:autoblog-indexphp-ferme-ajout|index.php]]
+     * [[web:autoblog-autoblogphp|autoblog.php]]
+     * [[web:autoblog-configphp|config.php]]
+     * [[web:autoblog-aryo|vvb.ini]]
